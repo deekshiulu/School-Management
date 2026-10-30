@@ -59,6 +59,8 @@ const groups = [
     label: "Administration",
     icon: "clipboard",
     links: [
+      { to: "/attendance", label: "Attendance", module: "students", icon: "calendar" },
+      { to: "/assessments", label: "Assessments", module: "assessments", icon: "book" },
       { to: "/audit", label: "Audit log", module: "audit", icon: "history" }
     ]
   }

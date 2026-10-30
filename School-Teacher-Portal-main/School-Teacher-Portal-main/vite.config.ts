@@ -6,6 +6,8 @@ export default defineConfig({
   base: '/School-Teacher-Portal/',
   plugins: [react()],
   server: {
+    port: 5174,
+    strictPort: true,
     proxy: {
       '/api': {
         target: 'http://localhost:8080',

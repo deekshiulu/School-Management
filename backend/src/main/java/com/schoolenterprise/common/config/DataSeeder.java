@@ -11,10 +11,16 @@ import com.schoolenterprise.school.entity.AcademicYear;
 import com.schoolenterprise.school.entity.School;
 import com.schoolenterprise.school.repository.AcademicYearRepository;
 import com.schoolenterprise.school.repository.SchoolRepository;
+import com.schoolenterprise.academics.entity.Department;
 import com.schoolenterprise.academics.entity.SchoolClass;
 import com.schoolenterprise.academics.entity.Section;
+import com.schoolenterprise.academics.entity.Subject;
+import com.schoolenterprise.academics.entity.SubjectClassMapping;
+import com.schoolenterprise.academics.repository.DepartmentRepository;
 import com.schoolenterprise.academics.repository.SchoolClassRepository;
 import com.schoolenterprise.academics.repository.SectionRepository;
+import com.schoolenterprise.academics.repository.SubjectClassMappingRepository;
+import com.schoolenterprise.academics.repository.SubjectRepository;
 import com.schoolenterprise.student.entity.ClassHistory;
 import com.schoolenterprise.student.entity.Enrollment;
 import com.schoolenterprise.student.entity.Guardian;
@@ -54,7 +60,7 @@ public class DataSeeder implements CommandLineRunner {
     private static final Logger log = LoggerFactory.getLogger(DataSeeder.class);
 
     private static final String[] MODULES = {
-            "students", "staff", "classes", "subjects", "fees", "finance", "users", "school", "audit", "dashboard"
+            "students", "staff", "classes", "subjects", "fees", "finance", "users", "school", "audit", "dashboard", "attendance", "assessments"
     };
     private static final String[] ACTIONS = {
             "view", "create", "edit", "delete", "approve", "publish", "export"
@@ -75,6 +81,9 @@ public class DataSeeder implements CommandLineRunner {
     private final GuardianRepository guardianRepository;
     private final StudentGuardianRepository studentGuardianRepository;
     private final PasswordEncoder passwordEncoder;
+    private final DepartmentRepository departmentRepository;
+    private final SubjectRepository subjectRepository;
+    private final SubjectClassMappingRepository subjectClassMappingRepository;
 
     @Override
     @Transactional
@@ -95,6 +104,7 @@ public class DataSeeder implements CommandLineRunner {
         seedDemoUser("accountant", "accountant@school.local", "Accountant User", "Accountant@123", accountant, school.getId(), "SCHOOL");
         seedDemoUser("teacher", "teacher@school.local", "Class Teacher", "Teacher@123", classTeacher, null, null);
         seedDemoClassesAndStudents(school, academicYear);
+        seedDemoSubjectsAndDepartments(school, academicYear);
         userRepository.findByUsername("teacher")
                 .ifPresent(teacher -> ensureDemoTeacherWorkflow(teacher, school, academicYear));
         seedDemoPromotionData(school, academicYear);
@@ -626,5 +636,64 @@ public class DataSeeder implements CommandLineRunner {
             existingEnrollment.setEnrolledOn(existingTargetYear.getStartDate());
             enrollmentRepository.save(existingEnrollment);
         }
+    }
+
+    private void seedDemoSubjectsAndDepartments(School school, AcademicYear academicYear) {
+        Department academics = seedDepartment(school.getId(), "Academics", "ACAD", "General academic studies");
+        Department languages = seedDepartment(school.getId(), "Languages", "LANG", "Language and literature studies");
+        Department sciences  = seedDepartment(school.getId(), "Sciences",  "SCI",  "Natural and applied sciences");
+        Department math      = seedDepartment(school.getId(), "Mathematics", "MATH", "Pure and applied mathematics");
+
+        Subject english = seedSubject(school.getId(), languages.getId(), "English Language", "ENG-101", "Core English communication and literature");
+        Subject mathematics = seedSubject(school.getId(), math.getId(), "Mathematics", "MTH-101", "Algebra, geometry, and arithmetic");
+        Subject generalScience = seedSubject(school.getId(), sciences.getId(), "General Science", "SCI-101", "Physics, Chemistry, and Biology fundamentals");
+        Subject socialStudies = seedSubject(school.getId(), academics.getId(), "Social Studies", "SOC-101", "History, Civics, and Geography");
+        Subject compSci = seedSubject(school.getId(), sciences.getId(), "Computer Science", "CSC-101", "Information Technology and programming basics");
+
+        List<Subject> allSubjects = List.of(english, mathematics, generalScience, socialStudies, compSci);
+        List<SchoolClass> classes = classRepository.findBySchoolId(school.getId());
+        for (SchoolClass sc : classes) {
+            for (Subject s : allSubjects) {
+                if (!subjectClassMappingRepository.existsBySubjectIdAndClassIdAndAcademicYearId(s.getId(), sc.getId(), academicYear.getId())) {
+                    SubjectClassMapping mapping = new SubjectClassMapping();
+                    mapping.setSubjectId(s.getId());
+                    mapping.setClassId(sc.getId());
+                    mapping.setAcademicYearId(academicYear.getId());
+                    subjectClassMappingRepository.save(mapping);
+                }
+            }
+        }
+        log.info("Seeded standard departments, subjects, and class mappings for {}", academicYear.getName());
+    }
+
+    private Department seedDepartment(Long schoolId, String name, String code, String description) {
+        return departmentRepository.findBySchoolId(schoolId).stream()
+                .filter(d -> d.getName().equalsIgnoreCase(name))
+                .findFirst()
+                .orElseGet(() -> {
+                    Department d = new Department();
+                    d.setSchoolId(schoolId);
+                    d.setName(name);
+                    d.setCode(code);
+                    d.setDescription(description);
+                    d.setStatus("ACTIVE");
+                    return departmentRepository.save(d);
+                });
+    }
+
+    private Subject seedSubject(Long schoolId, Long departmentId, String name, String code, String description) {
+        return subjectRepository.findBySchoolId(schoolId).stream()
+                .filter(s -> s.getCode().equalsIgnoreCase(code) || s.getName().equalsIgnoreCase(name))
+                .findFirst()
+                .orElseGet(() -> {
+                    Subject s = new Subject();
+                    s.setSchoolId(schoolId);
+                    s.setDepartmentId(departmentId);
+                    s.setName(name);
+                    s.setCode(code);
+                    s.setDescription(description);
+                    s.setStatus("ACTIVE");
+                    return subjectRepository.save(s);
+                });
     }
 }

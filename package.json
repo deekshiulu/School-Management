@@ -1,0 +1,28 @@
+{
+  "name": "school-management-platform",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Unified School Enterprise Platform (Admin + Teacher + Spring Boot)",
+  "type": "module",
+  "scripts": {
+    "start": "node start.js",
+    "dev": "node start.js",
+    "dev:frontends": "node start.js --frontends",
+    "dev:prod": "node start.js --prod",
+    "build": "node build.js",
+    "build:admin": "npm --prefix frontend run build",
+    "build:teacher": "npm --prefix School-Teacher-Portal-main/School-Teacher-Portal-main run build",
+    "build:backend": "cd backend && mvnw.cmd clean package -DskipTests",
+    "test": "npm --prefix frontend test"
+  },
+  "keywords": [
+    "school-enterprise",
+    "education",
+    "spring-boot",
+    "react",
+    "vite"
+  ],
+  "author": "",
+  "license": "ISC"
+}
+

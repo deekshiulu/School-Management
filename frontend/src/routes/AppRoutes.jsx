@@ -30,6 +30,8 @@ import PayrollPage from "../pages/PayrollPage.jsx";
 import ExpensesPage from "../pages/ExpensesPage.jsx";
 import FinancialReportsPage from "../pages/FinancialReportsPage.jsx";
 import AuditPage from "../pages/AuditPage.jsx";
+import AttendancePage from "../pages/AttendancePage.jsx";
+import AssessmentsPage from "../pages/AssessmentsPage.jsx";
 
 function ProtectedLayout() {
   const { user, logout } = useAuth();
@@ -97,6 +99,8 @@ export default function AppRoutes() {
         <Route path="expenses" element={<ExpensesPage />} />
         <Route path="financial-reports" element={<FinancialReportsPage />} />
         <Route path="audit" element={<AuditPage />} />
+        <Route path="attendance" element={<AttendancePage />} />
+        <Route path="assessments" element={<AssessmentsPage />} />
       </Route>
     </Routes>
   );

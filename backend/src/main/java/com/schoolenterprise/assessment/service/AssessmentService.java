@@ -98,6 +98,106 @@ public class AssessmentService {
         return response(saved);
     }
 
+    @Transactional
+    public AssessmentResponse update(Long id, AssessmentRequest request) {
+        if (!permissionService.isAdmin()) {
+            throw AppException.forbidden("Only an Admin may update assessments");
+        }
+        Assessment assessment = assessmentRepository.findById(id)
+                .orElseThrow(() -> AppException.notFound("Assessment not found: " + id));
+
+        SchoolClass schoolClass = classRepository.findById(request.classId())
+                .orElseThrow(() -> AppException.notFound("Class not found: " + request.classId()));
+        Subject subject = subjectRepository.findById(request.subjectId())
+                .orElseThrow(() -> AppException.notFound("Subject not found: " + request.subjectId()));
+        AcademicYear year = academicYearRepository.findById(request.academicYearId())
+                .orElseThrow(() -> AppException.notFound("Academic year not found: " + request.academicYearId()));
+        Section section = request.sectionId() == null ? null : sectionRepository.findById(request.sectionId())
+                .orElseThrow(() -> AppException.notFound("Section not found: " + request.sectionId()));
+
+        if (!"ACTIVE".equals(year.getStatus()) || !"ACTIVE".equals(subject.getStatus())
+                || (section != null && !"ACTIVE".equals(section.getStatus()))) {
+            throw AppException.badRequest("Assessment class, section, subject and academic year must be active");
+        }
+        if (section != null && (!request.classId().equals(section.getClassId())
+                || !request.academicYearId().equals(section.getAcademicYearId()))) {
+            throw AppException.badRequest("Assessment section must match its class and academic year");
+        }
+
+        assessment.setTitle(request.title().trim());
+        assessment.setClassId(schoolClass.getId());
+        assessment.setSectionId(section == null ? null : section.getId());
+        assessment.setSubjectId(subject.getId());
+        assessment.setAcademicYearId(year.getId());
+        assessment.setAssessmentDate(request.assessmentDate());
+        assessment.setMaxMarks(request.maxMarks());
+        if (request.status() != null && !request.status().isBlank()) {
+            assessment.setStatus(request.status().trim().toUpperCase());
+        }
+
+        Assessment saved = assessmentRepository.save(assessment);
+        auditService.record("assessments", "edit", "Assessment", saved.getId(),
+                "Updated assessment: " + saved.getTitle());
+        return response(saved);
+    }
+
+    @Transactional(readOnly = true)
+    public List<AssessmentResponse> adminList(Long classId, Long sectionId, Long subjectId,
+                                              Long academicYearId, String status) {
+        if (!permissionService.isAdmin()) {
+            throw AppException.forbidden("Only an Admin may view all assessments");
+        }
+        String normalizedStatus = (status == null || status.isBlank()) ? null : status.trim().toUpperCase();
+        return assessmentRepository.adminList(classId, sectionId, subjectId, academicYearId, normalizedStatus)
+                .stream()
+                .map(this::response)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public AssessmentResponse adminGet(Long id) {
+        if (!permissionService.isAdmin()) {
+            throw AppException.forbidden("Only an Admin may access this endpoint");
+        }
+        Assessment assessment = assessmentRepository.findById(id)
+                .orElseThrow(() -> AppException.notFound("Assessment not found"));
+        return response(assessment);
+    }
+
+    @Transactional
+    public AssessmentResponse publish(Long id) {
+        if (!permissionService.isAdmin()) {
+            throw AppException.forbidden("Only an Admin may publish assessments");
+        }
+        Assessment assessment = assessmentRepository.findById(id)
+                .orElseThrow(() -> AppException.notFound("Assessment not found"));
+        if ("PUBLISHED".equals(assessment.getStatus())) {
+            throw AppException.badRequest("Assessment is already published");
+        }
+        assessment.setStatus("PUBLISHED");
+        Assessment saved = assessmentRepository.save(assessment);
+        auditService.record("assessments", "publish", "Assessment", saved.getId(),
+                "Published assessment: " + saved.getTitle());
+        return response(saved);
+    }
+
+    @Transactional
+    public AssessmentResponse unpublish(Long id) {
+        if (!permissionService.isAdmin()) {
+            throw AppException.forbidden("Only an Admin may unpublish assessments");
+        }
+        Assessment assessment = assessmentRepository.findById(id)
+                .orElseThrow(() -> AppException.notFound("Assessment not found"));
+        if ("DRAFT".equals(assessment.getStatus())) {
+            throw AppException.badRequest("Assessment is already a draft");
+        }
+        assessment.setStatus("DRAFT");
+        Assessment saved = assessmentRepository.save(assessment);
+        auditService.record("assessments", "unpublish", "Assessment", saved.getId(),
+                "Unpublished assessment: " + saved.getTitle());
+        return response(saved);
+    }
+
     @Transactional(readOnly = true)
     public List<AssessmentResponse> teacherAssessments() {
         TeacherScope scope = teacherScope();
