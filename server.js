@@ -19,7 +19,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const PORT = process.env.PORT || 3000;
-const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8080";
+const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:8085";
 
 const adminDist = path.join(__dirname, "frontend", "dist");
 const teacherDist = path.join(__dirname, "School-Teacher-Portal-main", "School-Teacher-Portal-main", "dist");
@@ -82,7 +82,7 @@ function proxyRequest(req, res) {
 
   const options = {
     hostname: targetUrl.hostname,
-    port: targetUrl.port || 8080,
+    port: targetUrl.port || 8085,
     path: targetUrl.pathname + targetUrl.search,
     method: req.method,
     headers: {

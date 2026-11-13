@@ -9,9 +9,9 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
     proxy: {
-      "/api": "http://localhost:8080",
-      "/v3": "http://localhost:8080",
-      "/swagger-ui": "http://localhost:8080"
+      "/api": "http://localhost:8085",
+      "/v3": "http://localhost:8085",
+      "/swagger-ui": "http://localhost:8085"
     },
     allowedHosts: [
       "localhost",

@@ -2,7 +2,7 @@
  * Unified Process Orchestrator for School Management Platform
  * 
  * Runs all services concurrently from a single command:
- *   - Spring Boot Backend (Port 8080)
+ *   - Spring Boot Backend (Port 8085)
  *   - Admin Portal (Port 5173)
  *   - Teacher Portal (Port 5174)
  * 
@@ -139,7 +139,7 @@ ${colors.bright}=======================================================
 
   // Check port availability
   const portChecks = [
-    { name: "Backend", port: 8080, active: !frontendsOnly },
+    { name: "Backend", port: 8085, active: !frontendsOnly },
     { name: "Admin Portal", port: 5173, active: true },
     { name: "Teacher Portal", port: 5174, active: true },
   ];
