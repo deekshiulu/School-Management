@@ -5,14 +5,20 @@ import { clearSession, getToken } from "../auth/authStorage.js";
 // default to http://localhost:8080 for testing against the local backend.
 export function getApiBaseUrl() {
   if (typeof window !== "undefined") {
-    const custom = localStorage.getItem("app_custom_api_url");
-    if (custom) return custom.replace(/\/+$/, "");
+    let custom = localStorage.getItem("app_custom_api_url");
+    if (custom) {
+      custom = custom.trim().replace(/\/+$/, "")
+        .replace(/locslhost/gi, "localhost")
+        .replace(/loalhost/gi, "localhost")
+        .replace(/locahost/gi, "localhost");
+      return custom;
+    }
   }
   if (import.meta.env?.VITE_API_URL) {
     return import.meta.env.VITE_API_URL.replace(/\/+$/, "");
   }
   if (typeof window !== "undefined" && window.location.hostname.includes("github.io")) {
-    return "http://localhost:8080";
+    return "http://localhost:8085";
   }
   return "";
 }
@@ -22,7 +28,11 @@ export function setApiBaseUrl(url) {
     if (!url || !url.trim()) {
       localStorage.removeItem("app_custom_api_url");
     } else {
-      localStorage.setItem("app_custom_api_url", url.trim().replace(/\/+$/, ""));
+      const sanitized = url.trim().replace(/\/+$/, "")
+        .replace(/locslhost/gi, "localhost")
+        .replace(/loalhost/gi, "localhost")
+        .replace(/locahost/gi, "localhost");
+      localStorage.setItem("app_custom_api_url", sanitized);
     }
   }
 }

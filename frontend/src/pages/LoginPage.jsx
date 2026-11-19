@@ -86,7 +86,7 @@ export default function LoginPage() {
         </div>
         <div style={{ marginTop: "1rem", paddingTop: "0.75rem", borderTop: "1px solid var(--border, #e2e8f0)", fontSize: "0.82rem", color: "var(--muted, #64748b)" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span>Backend: <strong style={{ color: "var(--text, #1e293b)" }}>{apiUrl || "localhost:8080 (dev proxy)"}</strong></span>
+            <span>Backend: <strong style={{ color: "var(--text, #1e293b)" }}>{apiUrl || "localhost:8085 (dev proxy)"}</strong></span>
             <button
               type="button"
               style={{ background: "none", border: "none", color: "var(--primary, #3b82f6)", cursor: "pointer", padding: "0", textDecoration: "underline", fontSize: "0.82rem", width: "auto" }}
