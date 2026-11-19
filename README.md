@@ -121,3 +121,25 @@ Creating an invoice increases `totalDue`. A payment increases `totalPaid` and cr
 ## Postman
 
 Import `postman/School-Enterprise-Stage1.postman_collection.json`. Login first, copy `data.token` into the `token` variable.
+
+## Unified Multi-Portal Platform & Quick Start
+
+The platform unifies both the **School Administrator Portal** and the **Teacher Portal** under one repository.
+
+### One-Command Unified Startup (All Services)
+
+```bash
+# Starts Spring Boot Backend (Port 8085), Admin Portal (Port 5173), and Teacher Portal (Port 5174)
+npm start
+```
+
+Or for production build and single-port gateway:
+```bash
+node build.js    # Builds all 3 applications
+node server.js   # Serves Admin at http://localhost:3000/ and Teacher at http://localhost:3000/teacher/
+```
+
+### Official Documentation & Handover
+- 📘 [Knowledge Transfer (KT) & Handover Report](docs/KNOWLEDGE_TRANSFER_HANDOVER.md)
+- 🎬 [Feature Presentation Runbook & Live Demo Script](docs/FEATURE_PRESENTATION_RUNBOOK.md)
+- 📝 [Admin Portal UI/UX Audit & Plan](docs/ADMIN_PORTAL_AUDIT_PLAN.md)
